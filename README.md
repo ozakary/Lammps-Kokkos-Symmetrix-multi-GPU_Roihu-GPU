@@ -250,14 +250,6 @@ pair_coeff    * * fine-tuned_mace-mp-0b3-medium_vf-6.json C O
 > [!WARNING]
 > On LUMI, the fallback non-GPU-aware MPI path of `pair_symmetrix` produced **wrong forces and broken dynamics** in multi-GPU runs ([symmetrix issue #41](https://github.com/wcwitt/symmetrix/issues/41)). This is a `pair_symmetrix` issue, not a LUMI issue, so the same risk exists on Roihu. **Never use `-pk kokkos gpu/aware off`**, and always confirm that multi-GPU forces match single-GPU forces before production.
 
-The test kit in this repository runs the same system on 1, 2, and 4 GPUs inside a single `gputest` job and compares the results.
-
-| File | Purpose |
-|------|---------|
-| [`in.symmetrix_test`](in.symmetrix_test) | Step-0 force dump plus a short NVE run |
-| [`job_test_symmetrix.sh`](job_test_symmetrix.sh) | Runs the input on 1, 2, and 4 GPUs in one `gputest` allocation |
-| [`compare_runs.py`](compare_runs.py) | Compares energies, forces, and pressure across GPU counts, reports NVE drift and throughput |
-
 ### Run the test
 
 The test simulates a (10,0) single-walled carbon nanotube (3 unit cells, 120 C atoms) for 10 ps of NVT at 300 K on one GH200, using the MACE-OMAT-0 medium foundation model.
