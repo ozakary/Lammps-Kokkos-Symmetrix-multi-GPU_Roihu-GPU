@@ -1,0 +1,50 @@
+units metal
+atom_style atomic
+atom_modify map yes
+dimension 3
+newton on
+boundary p p p
+
+# Read initial structure
+read_data ./cnt_10_0_u3.data
+
+# Using Symmetrix package
+comm_modify   cutoff 8.0
+pair_style    symmetrix/mace
+pair_coeff    * * ./mace-omat-0-medium-6.json C
+
+mass 1 12.0107  # C
+
+# Set temperature (modify this value for each job)
+variable TEMP equal 300.0
+
+# Neighbor list settings
+neighbor 1.0 bin
+neigh_modify delay 5 every 1
+
+# Simulation timestep (1 fs)
+timestep 0.001
+
+#===============================================
+# TEST RUN (10 ps at TEMP)
+#===============================================
+
+print "Starting test run (10 ps at TEMP)..."
+
+# Initialize velocities
+velocity all create ${TEMP} 1234567 loop geom
+
+# No velocity reinitialization to maintain temperature continuity
+fix equil_nvt all nvt temp ${TEMP} ${TEMP} $(100*dt)
+
+# Output settings for equilibration
+thermo 100
+thermo_style custom step temp press pe ke etotal vol
+
+dump equil_dump all custom 100 equilibration.dump id type x y z vx vy vz fx fy fz
+restart 1000 equil.restart
+
+# Run equilibration: 10 ps = 10,000 timesteps
+run 10000
+
+print "Test run completed."
